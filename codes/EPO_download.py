@@ -26,9 +26,13 @@ from selenium import webdriver
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait as wait
 from selenium.webdriver.common.by import By
+import os
 
 # specifies the path of tesseract, if not in %PATH%
-pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files (x86)/Tesseract-OCR/tesseract.exe'
+#pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files (x86)/Tesseract-OCR/tesseract.exe'
+if not "tesseract" in os.environ["PATH"]:
+    os.environ["PATH"] = os.environ["PATH"] + ";C:\\Program Files (x86)\\Tesseract-OCR"
+    os.environ["TESSDATA_PREFIX"] = "C:\\Program Files (x86)\\Tesseract-OCR\\tessdata"
 
 # initializes webdriver
 options = webdriver.ChromeOptions()
@@ -52,15 +56,15 @@ def get_captcha(driver, element, path):
     # uses PIL library to open image in memory
     image = Image.open(path)
 
-    left = location['x'] + 80
-    top = location['y'] + 40
-    right = location['x'] + size['width'] + 200
-    bottom = location['y'] + size['height'] + 40
+    left = location['x'] #+ 80        may need to adjust offsets, depending on the result of captcha.png
+    top = location['y'] #+ 40
+    right = location['x'] + size['width'] #+ 200
+    bottom = location['y'] + size['height'] #+ 40
 
     image = image.crop((left, top, right, bottom))  # defines crop points
     image.save(path, 'png')  # saves new cropped image
-    return pytesseract.image_to_string(image, \
-           config='outputbase nobatch digits -c tessedit_char_whitelist=0123456789')
+    return pytesseract.image_to_string(image, lang='eng',\
+           config='--psm 6 outputbase nobatch digits')
 
 def every_downloads_chrome(driver):
     if not driver.current_url.startswith("chrome://downloads"):
