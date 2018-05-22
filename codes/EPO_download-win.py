@@ -56,7 +56,7 @@ def get_captcha(driver, element, path):
     # uses PIL library to open image in memory
     image = Image.open(path)
 
-    left = location['x'] #+ 80        may need to adjust offsets, depending on the result of captcha.png
+    left = location['x'] #+ 80        # may need to adjust offsets, depending on the result of captcha.png
     top = location['y'] #+ 40
     right = location['x'] + size['width'] #+ 200
     bottom = location['y'] + size['height'] #+ 40
