@@ -92,6 +92,8 @@ except KeyError:
     sys.exit()
 
 driver = webdriver.Chrome(chrome_options=options)
+driver.set_window_size(480, 450)
+driver.set_window_position(20, 20)
 
 for i in CC_NR:
     print('Downloading', i, 'from:')
