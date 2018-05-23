@@ -1,5 +1,5 @@
 # epo_download
-<b><font color="blue">Batch download patents and/or applications from worldwide.espacenet.com</font></b><br>
+<b><font color="blue">Batch download patents and/or applications from worldwide.espacenet.com. NO NEED FOR EPO OPS.</font></b><br>
 written by lancer1911<br>
 May 20, 2018
 
