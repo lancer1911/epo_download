@@ -53,10 +53,10 @@ def get_captcha(driver, element, path):
     # uses PIL library to open image in memory
     image = Image.open(path)
 
-    left = location['x'] + 350       # may need to adjust offsets, depending on the result of captcha.png
-    top = location['y'] + 90
-    right = location['x'] + size['width'] + 600
-    bottom = location['y'] + size['height'] + 130
+    left = location['x'] #+ 350       # may need to adjust offsets, depending on the result of captcha.png
+    top = location['y'] #+ 90
+    right = location['x'] + size['width'] #+ 600
+    bottom = location['y'] + size['height'] #+ 130
     #print(left, top, right, bottom)
     image = image.crop((left, top, right, bottom))  # defines crop points
     image.save(path, 'png')  # saves new cropped image
@@ -89,6 +89,8 @@ except KeyError:
     sys.exit()
 
 driver = webdriver.Chrome(chrome_options=options)
+driver.set_window_size(480, 450)
+driver.set_window_position(20, 20)
 
 for i in CC_NR:
     print('Downloading', i, 'from:')
