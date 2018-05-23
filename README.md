@@ -16,3 +16,31 @@ python epo_download.py option PatentNumber<br>
 WO2009012346<br>
 CN101208412A<br>
 WO2009012347A1<br>
+
+# Requirements (MacOS as an example)
+<b>Python 3</b> for Mac OS X<br>
+https://www.python.org/downloads/mac-osx/<br>
+
+<b>Brew</b>, if not installed<br>
+https://brew.sh/ <br>
+/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"<br>
+
+<b>Tesseract</b><br>
+brew install tesseract<br>
+
+<b>ChromeDriver</b><br>
+http://chromedriver.chromium.org/downloads, e.g.<br>
+https://chromedriver.storage.googleapis.com/index.html?path=2.38/<br>
+extract chromedriver_mac64.zip to /usr/local/bin
+
+<b>Pip</b>, if not installed<br>
+sudo easy_install pip<br>
+
+<b>PIL</b><br>
+pip install pillow<br>
+
+<b>pytesseract</b><br>
+pip install pytesseract<br>
+
+<b>Selenium</b><br>
+pip install selenium<br>
