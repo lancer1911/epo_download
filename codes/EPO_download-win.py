@@ -57,10 +57,10 @@ def get_captcha(driver, element, path):
     image = Image.open(path)
 
     left = location['x'] #+ 80        # may need to adjust offsets, depending on the result of captcha.png
-    top = location['y'] #+ 40
-    right = location['x'] + size['width'] #+ 200
-    bottom = location['y'] + size['height'] #+ 40
-
+    top = location['y'] + 90
+    right = location['x'] + size['width'] + 400
+    bottom = location['y'] + size['height'] + 130
+    #print(left, top, right, bottom)
     image = image.crop((left, top, right, bottom))  # defines crop points
     image.save(path, 'png')  # saves new cropped image
     return pytesseract.image_to_string(image, lang='eng',\
@@ -84,7 +84,7 @@ def highlight(driver,element):
     apply_style("background: yellow; border: 2px solid #eea0a0;@-webkit-keyframes blink { from { opacity: 1; } to { opacity: 0; } }")
     time.sleep(.3)
     apply_style(original_style)
-
+    
 arg_names = ['command', 'option', 'filename']
 args = dict(zip(arg_names, sys.argv))
 
@@ -102,11 +102,11 @@ except KeyError:
     sys.exit()
 
 driver = webdriver.Chrome(chrome_options=options)
-driver.set_window_size(480, 450)
-driver.set_window_position(20, 20)
+driver.set_window_size(452, 446)
+driver.set_window_position(120, 120)
 
 for i in CC_NR:
-    print('Downloading', i, 'from:')
+    print(str("Downloading " + i + " from:"))
 
     # extracts CC, NR and KC from each patent number, KC may be absent
     CC = i[:2]
@@ -150,11 +150,12 @@ for i in CC_NR:
         captcha_text1 = captcha_text1.replace(" ", "")
 
         if captcha_text == captcha_text1:
-            print('Captcha tried', count, 'time(s)')
+            print(str("Captcha found after "+ str(count)+ " attempt(s)!"))
             print('Done!\n')
             count = 0
             break
 
 wait(driver, 120, 1).until(every_downloads_chrome)
+print("\nDownload complete!\n")
 driver.close()
 

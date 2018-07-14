@@ -43,7 +43,7 @@ Example 1: python epo_download.py -n WO2009012346,CN101208412A,WO2009012347A1\n\
 Example 2: python epo_download.py -l list.txt\n\n\
 content of list.txt:\nWO2009012346\nCN101208412A\nWO2009012347A1"
 
-def get_captcha(driver, element, path):
+def get_captcha(driver, element, path):   
     location = element.location
     size = element.size
 
@@ -53,9 +53,9 @@ def get_captcha(driver, element, path):
     # uses PIL library to open image in memory
     image = Image.open(path)
 
-    left = location['x'] + 150       # may need to adjust offsets, depending on the result of captcha.png
+    left = location['x'] #+ 150       # may need to adjust offsets, depending on the result of captcha.png
     top = location['y'] + 90
-    right = location['x'] + size['width'] + 400 #+ 600
+    right = location['x'] + size['width'] + 400
     bottom = location['y'] + size['height'] + 130
     #print(left, top, right, bottom)
     image = image.crop((left, top, right, bottom))  # defines crop points
@@ -70,7 +70,7 @@ def every_downloads_chrome(driver):
         var items = downloads.Manager.get().items_;
         if (items.every(e => e.state === "COMPLETE"))
             return items.map(e => e.file_url);
-        """)
+        """)              
 
 def highlight(driver,element):
     """Highlights (blinks) a Selenium Webdriver element"""
@@ -82,7 +82,6 @@ def highlight(driver,element):
     time.sleep(.3)
     apply_style(original_style)
     
-
 arg_names = ['command', 'option', 'filename']
 args = dict(zip(arg_names, sys.argv))
 
@@ -100,11 +99,11 @@ except KeyError:
     sys.exit()
 
 driver = webdriver.Chrome(chrome_options=options)
-driver.set_window_size(800, 600)
-driver.set_window_position(20, 20)
+driver.set_window_size(452, 446)
+driver.set_window_position(120, 120)
 
 for i in CC_NR:
-    print('Downloading', i, 'from:')
+    print(str("\nDownloading " + i + " from:"))
 
     # extracts CC, NR and KC from each patent number, KC may be absent
     CC = i[:2]
@@ -148,11 +147,11 @@ for i in CC_NR:
         captcha_text1 = captcha_text1.replace(" ", "")
 
         if captcha_text == captcha_text1:
-            print('Captcha tried', count, 'time(s)')
-            print('Done!\n')
+            print(str("Captcha found after "+ str(count)+ " attempt(s)!"))
             count = 0
             break
 
 wait(driver, 120, 1).until(every_downloads_chrome)
+print("\nDownload complete!\n")
 driver.close()
 
