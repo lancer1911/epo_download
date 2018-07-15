@@ -102,7 +102,7 @@ driver.set_window_size(480, 450)
 driver.set_window_position(20, 20)
 
 for i in CC_NR:
-    print('Downloading', i, 'from:')
+    print(str("\nDownloading " + i + " from:"))
 
     # extracts CC, NR and KC from each patent number, KC may be absent
     CC = i[:2]
@@ -145,11 +145,10 @@ for i in CC_NR:
         captcha_text1 = captcha_text1.replace(" ", "")
 
         if captcha_text == captcha_text1:
-            print('Captcha tried', count, 'time(s)')
-            print('Done!\n')
+            print(str("Captcha found after "+ str(count)+ " attempt(s)!"))
             count = 0
             break
 
 wait(driver, 120, 1).until(every_downloads_chrome)
+print("\nDownload complete!\n")
 driver.close()
-
