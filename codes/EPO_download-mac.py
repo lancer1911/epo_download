@@ -27,6 +27,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait as wait
 from selenium.webdriver.common.by import By
 import os
+from io import BytesIO
 
 # specifies the path of tesseract
 pytesseract.pytesseract.tesseract_cmd = '/usr/local/bin/tesseract'
@@ -35,6 +36,7 @@ pytesseract.pytesseract.tesseract_cmd = '/usr/local/bin/tesseract'
 options = webdriver.ChromeOptions()
 options.add_argument('--ignore-certificate-errors')
 options.add_argument("--test-type")
+options.add_argument("--disable-infobars") #removing infobar "chrome is controlled by automated ..."
 options.binary_location = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
 Usage = "\nUsage: python epo_download.py option PatentNumber\n\
@@ -43,45 +45,42 @@ Example 1: python epo_download.py -n WO2009012346,CN101208412A,WO2009012347A1\n\
 Example 2: python epo_download.py -l list.txt\n\n\
 content of list.txt:\nWO2009012346\nCN101208412A\nWO2009012347A1"
 
-def get_captcha(driver, element, path):   
+def get_captcha(driver, element, path):
     location = element.location
     size = element.size
 
     # saves screenshot of entire page
-    driver.save_screenshot(path)
-
+    #driver.save_screenshot(path)
+    png = driver.get_screenshot_as_png()
+    
     # uses PIL library to open image in memory
-    image = Image.open(path)
+    #image = Image.open(path)
+    image = Image.open(BytesIO(png))
 
-    left = location['x'] #+ 150       # may need to adjust offsets, depending on the result of captcha.png
-    top = location['y'] + 90
-    right = location['x'] + size['width'] + 400
-    bottom = location['y'] + size['height'] + 130
-    #print(left, top, right, bottom)
+    # IMPORTANT! resize the image to the resolution of the browser, from those of the screen
+    image = image.resize((driver.execute_script('return window.innerWidth;'), driver.execute_script('return window.innerHeight;')))
+
+    left = location['x'] 
+    top = location['y'] 
+    right = location['x'] + size['width'] 
+    bottom = location['y'] + size['height']
+    
     image = image.crop((left, top, right, bottom))  # defines crop points
+
     image.save(path, 'png')  # saves new cropped image
     return pytesseract.image_to_string(image, lang='eng',\
            config='--psm 6 outputbase nobatch digits')
 
 def every_downloads_chrome(driver):
+    driver.maximize_window()
     if not driver.current_url.startswith("chrome://downloads"):
         driver.get("chrome://downloads/")
     return driver.execute_script("""
         var items = downloads.Manager.get().items_;
         if (items.every(e => e.state === "COMPLETE"))
             return items.map(e => e.file_url);
-        """)              
+        """)
 
-def highlight(driver,element):
-    """Highlights (blinks) a Selenium Webdriver element"""
-    def apply_style(s):
-        driver.execute_script("arguments[0].setAttribute('style', arguments[1]);",
-                              element, s)
-    original_style = element.get_attribute('style')
-    apply_style("background: yellow; border: 2px solid #eea0a0;@-webkit-keyframes blink { from { opacity: 1; } to { opacity: 0; } }")
-    time.sleep(.3)
-    apply_style(original_style)
-    
 arg_names = ['command', 'option', 'filename']
 args = dict(zip(arg_names, sys.argv))
 
@@ -99,11 +98,11 @@ except KeyError:
     sys.exit()
 
 driver = webdriver.Chrome(chrome_options=options)
-driver.set_window_size(452, 446)
-driver.set_window_position(120, 120)
+driver.set_window_size(480, 450)
+driver.set_window_position(20, 20)
 
 for i in CC_NR:
-    print(str("\nDownloading " + i + " from:"))
+    print('Downloading', i, 'from:')
 
     # extracts CC, NR and KC from each patent number, KC may be absent
     CC = i[:2]
@@ -130,7 +129,6 @@ for i in CC_NR:
         count += 1
         captcha_text = captcha_text1 = ""
         img = driver.find_element_by_id("watermark")
-        highlight(driver,img)
         captcha_text = get_captcha(driver, img, "captcha.png")
         captcha_text = captcha_text.replace(" ", "")
 
@@ -147,11 +145,11 @@ for i in CC_NR:
         captcha_text1 = captcha_text1.replace(" ", "")
 
         if captcha_text == captcha_text1:
-            print(str("Captcha found after "+ str(count)+ " attempt(s)!"))
+            print('Captcha tried', count, 'time(s)')
+            print('Done!\n')
             count = 0
             break
 
 wait(driver, 120, 1).until(every_downloads_chrome)
-print("\nDownload complete!\n")
 driver.close()
 

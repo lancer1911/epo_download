@@ -27,6 +27,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait as wait
 from selenium.webdriver.common.by import By
 import os
+from io import BytesIO
+
 
 # specifies the path of tesseract, if not in %PATH%
 #pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files (x86)/Tesseract-OCR/tesseract.exe'
@@ -38,6 +40,7 @@ if not "tesseract" in os.environ["PATH"]:
 options = webdriver.ChromeOptions()
 options.add_argument('--ignore-certificate-errors')
 options.add_argument("--test-type")
+options.add_argument("--disable-infobars")  #removing infobar "chrome is controlled by automated ..."
 options.binary_location = "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe"
 
 Usage = "\nUsage: python epo_download.py option PatentNumber\n\
@@ -51,22 +54,29 @@ def get_captcha(driver, element, path):
     size = element.size
 
     # saves screenshot of entire page
-    driver.save_screenshot(path)
-
+    #driver.save_screenshot(path)
+    png = driver.get_screenshot_as_png()
+    
     # uses PIL library to open image in memory
-    image = Image.open(path)
+    #image = Image.open(path)
+    image = Image.open(BytesIO(png))
+    
+    # IMPORTANT! resize the image to the resolution of the browser, from those of the screen
+    image = image.resize((driver.execute_script('return window.innerWidth;'), driver.execute_script('return window.innerHeight;')))
+       
+    left = location['x'] 
+    top = location['y'] 
+    right = location['x'] + size['width'] 
+    bottom = location['y'] + size['height'] 
 
-    left = location['x'] #+ 80        # may need to adjust offsets, depending on the result of captcha.png
-    top = location['y'] + 90
-    right = location['x'] + size['width'] + 400
-    bottom = location['y'] + size['height'] + 130
-    #print(left, top, right, bottom)
     image = image.crop((left, top, right, bottom))  # defines crop points
-    image.save(path, 'png')  # saves new cropped image
+
+    image.save(path, 'png')  # saves new cropped image, for debugging
     return pytesseract.image_to_string(image, lang='eng',\
            config='--psm 6 outputbase nobatch digits')
 
 def every_downloads_chrome(driver):
+    driver.maximize_window()
     if not driver.current_url.startswith("chrome://downloads"):
         driver.get("chrome://downloads/")
     return driver.execute_script("""
@@ -102,11 +112,12 @@ except KeyError:
     sys.exit()
 
 driver = webdriver.Chrome(chrome_options=options)
-driver.set_window_size(452, 446)
-driver.set_window_position(120, 120)
+driver.set_window_size(480, 450)
+driver.set_window_position(20, 20)
+
 
 for i in CC_NR:
-    print(str("Downloading " + i + " from:"))
+    print(str("\nDownloading " + i + " from:"))
 
     # extracts CC, NR and KC from each patent number, KC may be absent
     CC = i[:2]
@@ -151,7 +162,6 @@ for i in CC_NR:
 
         if captcha_text == captcha_text1:
             print(str("Captcha found after "+ str(count)+ " attempt(s)!"))
-            print('Done!\n')
             count = 0
             break
 
