@@ -28,7 +28,12 @@ from selenium.webdriver.support.ui import WebDriverWait as wait
 from selenium.webdriver.common.by import By
 import os
 from io import BytesIO
+import tkinter as tk
+from tkinter import filedialog
+from os import path
 
+root = tk.Tk()
+root.withdraw()
 
 # specifies the path of tesseract, if not in %PATH%
 #pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files (x86)/Tesseract-OCR/tesseract.exe'
@@ -96,9 +101,18 @@ def highlight(driver,element):
     apply_style("filter: invert(100%);")
     time.sleep(.3)
     apply_style(original_style)
+
+def specify_file(arg1,arg2,arg3):
+    file_path = None
+    while not file_path:
+       file_path= filedialog.askopenfilename(initialdir = arg1, title = arg2, filetypes = arg3)
+       if file_path:
+           return file_path
     
 arg_names = ['command', 'option', 'filename']
 args = dict(zip(arg_names, sys.argv))
+
+d = path.dirname(__file__)
 
 try:
     if args['option'] == "-n" and args['filename'] != None:
@@ -110,8 +124,11 @@ try:
         print(Usage)
         sys.exit()
 except KeyError:
-    print(Usage)
-    sys.exit()
+    #print(Usage)
+    filename = specify_file(path.join(d, './'), 'Select TEXT file containing the patent/application numbers', (('text files','*.txt'),('all files','*.*')))
+    with open(filename) as f:
+        CC_NR = f.read().splitlines() # splits string from the text file
+    #sys.exit()
 
 driver = webdriver.Chrome(chrome_options=options)
 driver.set_window_size(480, 450)

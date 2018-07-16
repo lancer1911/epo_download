@@ -28,6 +28,12 @@ from selenium.webdriver.support.ui import WebDriverWait as wait
 from selenium.webdriver.common.by import By
 import os
 from io import BytesIO
+import tkinter as tk
+from tkinter import filedialog
+from os import path
+
+root = tk.Tk()
+root.withdraw()
 
 # specifies the path of tesseract
 pytesseract.pytesseract.tesseract_cmd = '/usr/local/bin/tesseract'
@@ -106,8 +112,11 @@ try:
         print(Usage)
         sys.exit()
 except KeyError:
-    print(Usage)
-    sys.exit()
+    #print(Usage)
+    filename = specify_file(path.join(d, './'), 'Select TEXT file containing the patent/application numbers', (('text files','*.txt'),('all files','*.*')))
+    with open(filename) as f:
+        CC_NR = f.read().splitlines() # splits string from the text file
+    #sys.exit()
 
 driver = webdriver.Chrome(chrome_options=options)
 driver.set_window_size(480, 450)
