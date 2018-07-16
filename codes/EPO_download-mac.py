@@ -173,5 +173,5 @@ for i in CC_NR:
             break
 
 wait(driver, 120, 1).until(every_downloads_chrome)
-print("\nDownload complete!\n")
+print("\nDownload complete!\nThe patents/applications are now in your default download directory.")
 driver.close()
