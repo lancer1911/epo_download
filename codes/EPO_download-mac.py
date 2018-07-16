@@ -87,7 +87,9 @@ def highlight(driver,element):
         driver.execute_script("arguments[0].setAttribute('style', arguments[1]);",
                               element, s)
     original_style = element.get_attribute('style')
-    apply_style("background: yellow; border: 2px solid #eea0a0;@-webkit-keyframes blink { from { opacity: 1; } to { opacity: 0; } }")
+    #apply_style("background: yellow; border: 2px solid #eea0a0;@-webkit-keyframes blink { from { opacity: 1; } to { opacity: 0; } }")
+    time.sleep(.3)
+    apply_style("filter: invert(100%);")
     time.sleep(.3)
     apply_style(original_style)
 
