@@ -28,12 +28,14 @@ from selenium.webdriver.support.ui import WebDriverWait as wait
 from selenium.webdriver.common.by import By
 import os
 from io import BytesIO
-import tkinter as tk
-from tkinter import filedialog
+import Tkinter as tk
+import Tkinter, Tkconstants, tkFileDialog
+    
 from os import path
 
 root = tk.Tk()
 root.withdraw()
+
 
 # specifies the path of tesseract
 pytesseract.pytesseract.tesseract_cmd = '/usr/local/bin/tesseract'
@@ -99,8 +101,18 @@ def highlight(driver,element):
     time.sleep(.3)
     apply_style(original_style)
 
+def specify_file(arg1,arg2,arg3):
+    file_path = None
+    while not file_path:
+       file_path= tkFileDialog.askopenfilename(initialdir = arg1, title = arg2, filetypes = arg3)
+       root.update()
+       if file_path:
+           return file_path
+
 arg_names = ['command', 'option', 'filename']
 args = dict(zip(arg_names, sys.argv))
+
+d = path.dirname(__file__)
 
 try:
     if args['option'] == "-n" and args['filename'] != None:
