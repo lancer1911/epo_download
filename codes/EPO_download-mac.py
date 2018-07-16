@@ -81,6 +81,16 @@ def every_downloads_chrome(driver):
             return items.map(e => e.file_url);
         """)
 
+def highlight(driver,element):
+    """Highlights (blinks) a Selenium Webdriver element"""
+    def apply_style(s):
+        driver.execute_script("arguments[0].setAttribute('style', arguments[1]);",
+                              element, s)
+    original_style = element.get_attribute('style')
+    apply_style("background: yellow; border: 2px solid #eea0a0;@-webkit-keyframes blink { from { opacity: 1; } to { opacity: 0; } }")
+    time.sleep(.3)
+    apply_style(original_style)
+
 arg_names = ['command', 'option', 'filename']
 args = dict(zip(arg_names, sys.argv))
 
@@ -129,6 +139,8 @@ for i in CC_NR:
         count += 1
         captcha_text = captcha_text1 = ""
         img = driver.find_element_by_id("watermark")
+        highlight(driver,img)
+        
         captcha_text = get_captcha(driver, img, "captcha.png")
         captcha_text = captcha_text.replace(" ", "")
 

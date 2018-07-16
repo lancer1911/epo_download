@@ -145,6 +145,7 @@ for i in CC_NR:
         captcha_text = captcha_text1 = ""
         img = driver.find_element_by_id("watermark")
         highlight(driver,img)
+        
         captcha_text = get_captcha(driver, img, "captcha.png")
         captcha_text = captcha_text.replace(" ", "")
 
