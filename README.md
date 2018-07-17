@@ -44,3 +44,6 @@ pip install pytesseract<br>
 
 <b>Selenium</b><br>
 pip install selenium<br>
+
+<b>tqdm</b><br>
+pip install tqdm<br>
