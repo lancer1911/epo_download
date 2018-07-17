@@ -46,7 +46,7 @@ if not "tesseract" in os.environ["PATH"]:
 options = webdriver.ChromeOptions()
 options.add_argument('--ignore-certificate-errors')
 options.add_argument("--test-type")
-options.add_argument("--disable-infobars")  #removing infobar "chrome is controlled by automated ..."
+options.add_argument("--disable-infobars")  #removes infobar "chrome is controlled by automated ..."
 options.binary_location = "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe"
 
 Usage = "\nUsage: python epo_download.py option PatentNumber\n\
@@ -67,7 +67,7 @@ def get_captcha(driver, element, path):
     #image = Image.open(path)
     image = Image.open(BytesIO(png))
     
-    # IMPORTANT! resize the image to the resolution of the browser, from those of the screen
+    # IMPORTANT! resizes the image base upon the resolution of the browser, instead of that of the screen
     image = image.resize((driver.execute_script('return window.innerWidth;'), driver.execute_script('return window.innerHeight;')))
        
     left = location['x'] 
@@ -185,7 +185,7 @@ for i in CC_NR:
         if captcha_text == captcha_text1:
             print(str("Captcha found after "+ str(count)+ " attempt(s)!"))
 
-            print("\nTo prevent from blocking by the servers, we have to wait for 10 seconds.")
+            print("\nTo prevent from being blocked by the servers, we have to wait for 10 seconds.")
             for i in tqdm(range(10)):
                 time.sleep(1)
 
@@ -193,6 +193,6 @@ for i in CC_NR:
             break
 
 wait(driver, 120, 1).until(every_downloads_chrome)
-print("\nDownload complete!\nThe patents/applications are now in your default download directory.")
+print("\nDownload complete!\nThe patents/applications are now in your default download directory.\n")
 driver.close()
 

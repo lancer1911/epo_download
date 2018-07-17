@@ -29,9 +29,9 @@ from selenium.webdriver.common.by import By
 import os
 from io import BytesIO
 import Tkinter as tk
-import Tkinter, Tkconstants, tkFileDialog
-    
+import tkFileDialog    
 from os import path
+from tqdm import tqdm
 
 root = tk.Tk()
 root.withdraw()
@@ -44,7 +44,7 @@ pytesseract.pytesseract.tesseract_cmd = '/usr/local/bin/tesseract'
 options = webdriver.ChromeOptions()
 options.add_argument('--ignore-certificate-errors')
 options.add_argument("--test-type")
-options.add_argument("--disable-infobars") #removing infobar "chrome is controlled by automated ..."
+options.add_argument("--disable-infobars") #removes infobar "chrome is controlled by automated ..."
 options.binary_location = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
 Usage = "\nUsage: python epo_download.py option PatentNumber\n\
@@ -181,9 +181,13 @@ for i in CC_NR:
 
         if captcha_text == captcha_text1:
             print(str("Captcha found after "+ str(count)+ " attempt(s)!"))
+            print("\nTo prevent from being blocked by the servers, we have to wait for 10 seconds.")
+            for i in tqdm(range(10)):
+                time.sleep(1)
+
             count = 0
             break
 
 wait(driver, 120, 1).until(every_downloads_chrome)
-print("\nDownload complete!\nThe patents/applications are now in your default download directory.")
+print("\nDownload complete!\nThe patents/applications are now in your default download directory.\n")
 driver.close()
