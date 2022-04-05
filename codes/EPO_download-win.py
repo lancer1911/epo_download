@@ -1,7 +1,9 @@
-"""
+﻿"""
 Batch download patents and/or applications from worldwide.espacenet.com
 written by lancer1911
 May 20, 2018
+modified by lancer1911
+April 5, 2022
 
 Usage: python epo_download.py option PatentNumber
     option: -n, or -l
@@ -31,7 +33,9 @@ from io import BytesIO
 import tkinter as tk
 from tkinter import filedialog
 from os import path
+from pathlib import Path
 
+## 初始化对话框
 root = tk.Tk()
 root.withdraw()
 
@@ -45,8 +49,9 @@ if not "tesseract" in os.environ["PATH"]:
 options = webdriver.ChromeOptions()
 options.add_argument('--ignore-certificate-errors')
 options.add_argument("--test-type")
+options.add_experimental_option('excludeSwitches', ['enable-logging'])
 options.add_argument("--disable-infobars")  #removing infobar "chrome is controlled by automated ..."
-options.binary_location = "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe"
+options.binary_location = "C:/Program Files/Google/Chrome/Application/chrome.exe"
 
 Usage = "\nUsage: python epo_download.py option PatentNumber\n\
     option: -n, or -l \n    PatentNumber: [-n] patent numbers seperated by comma, or [-l] text file\n\n\
@@ -85,10 +90,12 @@ def every_downloads_chrome(driver):
     if not driver.current_url.startswith("chrome://downloads"):
         driver.get("chrome://downloads/")
     return driver.execute_script("""
-        var items = downloads.Manager.get().items_;
+        var items = document.querySelector('downloads-manager')
+            .shadowRoot.getElementById('downloadsList').items;
         if (items.every(e => e.state === "COMPLETE"))
-            return items.map(e => e.file_url);
+            return items.map(e => e.fileUrl || e.file_url);
         """)
+        
 
 def highlight(driver,element):
     """Highlights (blinks) a Selenium Webdriver element"""
@@ -108,6 +115,15 @@ def specify_file(arg1,arg2,arg3):
        file_path= filedialog.askopenfilename(initialdir = arg1, title = arg2, filetypes = arg3)
        if file_path:
            return file_path
+
+def is_downloading(filename):
+    for fname in os.listdir(str(Path.home()/"Downloads")):
+        if fname.startswith(filename):
+            # if downloading
+            return True
+    # if not downloading
+    return False
+
     
 arg_names = ['command', 'option', 'filename']
 args = dict(zip(arg_names, sys.argv))
@@ -130,7 +146,7 @@ except KeyError:
         CC_NR = f.read().splitlines() # splits string from the text file
     #sys.exit()
 
-driver = webdriver.Chrome(chrome_options=options)
+driver = webdriver.Chrome(options=options)
 driver.set_window_size(480, 450)
 driver.set_window_position(20, 20)
 
@@ -150,40 +166,45 @@ for i in CC_NR:
         KC = None
 
     # generates URL based on CC, NR and KC, if any
+    
     URL = str("https://worldwide.espacenet.com/data/espacenetDocument.pdf?flavour=trueFull&CC=" \
               + CC + "&NR=" + NR)
     if KC != None:
         URL = str(URL + "&KC=" + KC)
     
     print(URL)
-    driver.get(URL)
+    #driver.get(URL)
 
     count = 0
+
+
     while True:
+        time.sleep(1)
+        driver.refresh()
+        driver.get(URL)
         count += 1
-        captcha_text = captcha_text1 = ""
-        img = driver.find_element_by_id("watermark")
+        #captcha_text = captcha_text1 = ""
+        captcha_text = ""
+
+        wait(driver, 10).until(EC.presence_of_element_located((By.ID, "watermark")))
+        img = driver.find_element(by=By.ID, value="watermark")
         highlight(driver,img)
         
         captcha_text = get_captcha(driver, img, "captcha.png")
         captcha_text = captcha_text.replace(" ", "")
-
-        captcha_form = driver.find_element_by_id("response")
+        
+        captcha_form = driver.find_element(by=By.ID, value="response")
+        time.sleep(1)
         captcha_form.send_keys(captcha_text)
 
-        driver.find_element_by_id("submitBtnId").click()
+        wait(driver, 10).until(EC.presence_of_element_located((By.ID, "submitBtnId")))
+        driver.find_element(by=By.ID, value="submitBtnId").click()
     
-        time.sleep(1)
-        wait(driver, 10).until(EC.presence_of_element_located((By.ID, "watermark")))
-    
-        img1 = driver.find_element_by_id("watermark")
-        captcha_text1 = get_captcha(driver, img1, "captcha1.png")
-        captcha_text1 = captcha_text1.replace(" ", "")
-
-        if captcha_text == captcha_text1:
-            print(str("Captcha found after "+ str(count)+ " attempt(s)!"))
-            count = 0
+          
+        if is_downloading(CC + NR) == True:
             break
+        
+
 
 wait(driver, 120, 1).until(every_downloads_chrome)
 print("\nDownload complete!\nThe patents/applications are now in your default download directory.")
